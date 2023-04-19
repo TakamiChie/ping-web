@@ -27,6 +27,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 async function ping() {
+  let label;
   if(document.getElementById("active").checked){
     let r = await getPingTime();
     if(!r.error){
@@ -34,17 +35,22 @@ async function ping() {
         tick: new Date().getTime(),
         time: r.duration
       });
-      document.getElementById("time").textContent = `ping ${r.length}byte responce ${r.duration}ms(${r.speed})Kbps`
+      label = `ping ${r.length}byte responce ${r.duration}ms(${r.speed})Kbps`
     }else{
       log.push({
         tick: new Date().getTime(),
         time: null,
         message: r.error
       });
-      document.getElementById("time").textContent = `error!:${r.error}`
+      label = `error!:${r.error}`
     }
     if(log.length > 100) log = log.slice(log.length - 100);
     chart.setData(log);
+    const times = log.map((v) => v.time).filter((v) => v != null);
+    const max = Math.min(...times);
+    const min = Math.max(...times);
+    const avg = times.reduce((a,b) => {return a+b},0) / times.length;
+    document.getElementById("time").textContent = `${label}(${max}ms～${min}ms/avg:${avg.toFixed(2)}ms)`; 
     setTimeout(ping, 1000);
   }
 }
