@@ -56,7 +56,10 @@ async function getPingTime() {
     const res = await fetch(`${location.href}/res/data.txt`);
     const end = new Date();
     const duration = (end - start);
-    const length = res.headers.get("Content-Length");
+    let length = parseInt(res.headers.get("Content-Length"));
+    for (const [name, value] of res.headers.entries()) {
+      length += name.length + value.length;
+    }
     result = {
       duration: duration,
       length: length,
