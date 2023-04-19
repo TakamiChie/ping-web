@@ -60,7 +60,7 @@ async function getPingTime() {
     result = {
       duration: duration,
       length: length,
-      speed: (length * 8 / (duration / 1000) / 1000).toFixed(2)
+      speed: (length * 8 / (duration / 1000) / 1024).toFixed(2)
     };
   } catch (error) {
     console.log(error);
