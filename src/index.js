@@ -35,7 +35,7 @@ async function ping() {
         tick: new Date().getTime(),
         time: r.duration
       });
-      label = `ping ${r.length}byte responce ${r.duration}ms(${r.speed})Kbps`
+      label = `ping ${r.length}byte responce ${r.duration}ms(${r.speed}Kbps)`
     }else{
       log.push({
         tick: new Date().getTime(),
