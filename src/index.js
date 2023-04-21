@@ -9,6 +9,8 @@ window.addEventListener('DOMContentLoaded', () => {
     labels: ['Response'],
     resize: true,
     smooth: true,
+    goalLineColors: ["green", "red"],
+    goalStrokeWidth: "3px",
     hoverCallback: function(index, options, content) {
       let data = options.data[index];
       let message = `${dayjs(data.tick).format("HH:mm:ss")}<br>`;
@@ -22,6 +24,9 @@ window.addEventListener('DOMContentLoaded', () => {
   chart = new Morris.Line(options);
   document.getElementById("active").addEventListener("input", (e) => {
     if(e.target.checked) ping();
+  });
+  document.getElementById("threshold").addEventListener("change", (e) => {
+    updateGoalValue();
   });
   setTimeout(ping, 1000);
 });
@@ -47,6 +52,7 @@ async function ping() {
     if(log.length > 100) log = log.slice(log.length - 100);
     chart.setData(log);
     const [min, max, avg] = getMinMax();
+    updateGoalValue();
     document.getElementById("time").textContent = `${label}(${max}ms～${min}ms/avg:${avg.toFixed(2)}ms)`; 
     setTimeout(ping, 1000);
   }
@@ -75,6 +81,13 @@ async function getPingTime() {
   return result;
 }
 
+function updateGoalValue() {
+  const [_,__,avg] = getMinMax();
+  const g = [avg];
+  const n = document.getElementById("threshold").value;
+  if(n != -1) g.push(n);
+  chart.options.goals = g;
+}
 
 function getMinMax(){
   const times = log.map((v) => v.time).filter((v) => v != null);
