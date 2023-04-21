@@ -1,5 +1,6 @@
 let chart;
 let log = [];
+let events = [];
 window.addEventListener('DOMContentLoaded', () => {
   var options = {
     element: 'line-chart',
@@ -9,6 +10,9 @@ window.addEventListener('DOMContentLoaded', () => {
     labels: ['Response'],
     resize: true,
     smooth: true,
+    events: events,
+    eventLineColors: ["red"],
+    eventLineWidth: "5px",
     goalLineColors: ["green", "red"],
     goalStrokeWidth: "3px",
     hoverCallback: function(index, options, content) {
@@ -37,21 +41,29 @@ async function ping() {
   let label;
   if(document.getElementById("active").checked){
     let r = await getPingTime();
+    let record;
     if(!r.error){
-      log.push({
+      record = {
         tick: new Date().getTime(),
         time: r.duration
-      });
+      };
+      if(isWarning(record)){
+        events.push(record.tick);
+      }
       label = `ping ${r.length}byte responce ${r.duration}ms(${r.speed}Kbps)`
     }else{
-      log.push({
+      record = {
         tick: new Date().getTime(),
         time: null,
         message: r.error
-      });
-      label = `error!:${r.error}`
+      };
+      events.push(record.tick);
+      label = `error!:${r.error}`;
     }
-    if(log.length > 100) log = log.slice(log.length - 100);
+    log.push(record);
+    while(log.length > 100){
+      if(log.shift().tick == events[0]) events.shift();
+    }
     chart.setData(log);
     const [min, max, avg] = getMinMax();
     updateGoalValue();
@@ -97,4 +109,9 @@ function getMinMax(){
   const min = Math.max(...times);
   const avg = times.reduce((a,b) => {return a+b},0) / times.length;
   return [min, max, avg];
+}
+
+function isWarning(record) {
+  let v = parseInt(document.getElementById("threshold").value);
+  return v != -1 && v < record.time;
 }
