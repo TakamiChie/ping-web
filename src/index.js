@@ -21,11 +21,13 @@ window.addEventListener('DOMContentLoaded', () => {
       return dayjs(x).format("m:ss");
     }
   };
+  document.getElementById("threshold").value = localStorage.getItem("threshold") ? localStorage.getItem("threshold") : "-1";
   chart = new Morris.Line(options);
   document.getElementById("active").addEventListener("input", (e) => {
     if(e.target.checked) ping();
   });
   document.getElementById("threshold").addEventListener("change", (e) => {
+    localStorage.setItem(e.target.id, e.target.value);
     updateGoalValue();
   });
   setTimeout(ping, 1000);
