@@ -46,10 +46,7 @@ async function ping() {
     }
     if(log.length > 100) log = log.slice(log.length - 100);
     chart.setData(log);
-    const times = log.map((v) => v.time).filter((v) => v != null);
-    const max = Math.min(...times);
-    const min = Math.max(...times);
-    const avg = times.reduce((a,b) => {return a+b},0) / times.length;
+    const [min, max, avg] = getMinMax();
     document.getElementById("time").textContent = `${label}(${max}ms～${min}ms/avg:${avg.toFixed(2)}ms)`; 
     setTimeout(ping, 1000);
   }
@@ -76,4 +73,13 @@ async function getPingTime() {
     result = {error:error};
   }
   return result;
+}
+
+
+function getMinMax(){
+  const times = log.map((v) => v.time).filter((v) => v != null);
+  const max = Math.min(...times);
+  const min = Math.max(...times);
+  const avg = times.reduce((a,b) => {return a+b},0) / times.length;
+  return [min, max, avg];
 }
