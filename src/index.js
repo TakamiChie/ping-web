@@ -1,5 +1,6 @@
 let chart;
 let log = [];
+let events = [];
 window.addEventListener('DOMContentLoaded', () => {
   var options = {
     element: 'line-chart',
@@ -9,6 +10,11 @@ window.addEventListener('DOMContentLoaded', () => {
     labels: ['Response'],
     resize: true,
     smooth: true,
+    events: events,
+    eventLineColors: ["red"],
+    eventLineWidth: "5px",
+    goalLineColors: ["green", "red"],
+    goalStrokeWidth: "3px",
     hoverCallback: function(index, options, content) {
       let data = options.data[index];
       let message = `${dayjs(data.tick).format("HH:mm:ss")}<br>`;
@@ -19,9 +25,14 @@ window.addEventListener('DOMContentLoaded', () => {
       return dayjs(x).format("m:ss");
     }
   };
+  document.getElementById("threshold").value = localStorage.getItem("threshold") ? localStorage.getItem("threshold") : "-1";
   chart = new Morris.Line(options);
   document.getElementById("active").addEventListener("input", (e) => {
     if(e.target.checked) ping();
+  });
+  document.getElementById("threshold").addEventListener("change", (e) => {
+    localStorage.setItem(e.target.id, e.target.value);
+    updateGoalValue();
   });
   setTimeout(ping, 1000);
 });
@@ -30,26 +41,32 @@ async function ping() {
   let label;
   if(document.getElementById("active").checked){
     let r = await getPingTime();
+    let record;
     if(!r.error){
-      log.push({
+      record = {
         tick: new Date().getTime(),
         time: r.duration
-      });
+      };
+      if(isWarning(record)){
+        events.push(record.tick);
+      }
       label = `ping ${r.length}byte responce ${r.duration}ms(${r.speed}Kbps)`
     }else{
-      log.push({
+      record = {
         tick: new Date().getTime(),
         time: null,
         message: r.error
-      });
-      label = `error!:${r.error}`
+      };
+      events.push(record.tick);
+      label = `error!:${r.error}`;
     }
-    if(log.length > 100) log = log.slice(log.length - 100);
+    log.push(record);
+    while(log.length > 100){
+      if(log.shift().tick == events[0]) events.shift();
+    }
     chart.setData(log);
-    const times = log.map((v) => v.time).filter((v) => v != null);
-    const max = Math.min(...times);
-    const min = Math.max(...times);
-    const avg = times.reduce((a,b) => {return a+b},0) / times.length;
+    const [min, max, avg] = getMinMax();
+    updateGoalValue();
     document.getElementById("time").textContent = `${label}(${max}ms～${min}ms/avg:${avg.toFixed(2)}ms)`; 
     setTimeout(ping, 1000);
   }
@@ -76,4 +93,25 @@ async function getPingTime() {
     result = {error:error};
   }
   return result;
+}
+
+function updateGoalValue() {
+  const [_,__,avg] = getMinMax();
+  const g = [avg];
+  const n = document.getElementById("threshold").value;
+  if(n != -1) g.push(n);
+  chart.options.goals = g;
+}
+
+function getMinMax(){
+  const times = log.map((v) => v.time).filter((v) => v != null);
+  const max = Math.min(...times);
+  const min = Math.max(...times);
+  const avg = times.reduce((a,b) => {return a+b},0) / times.length;
+  return [min, max, avg];
+}
+
+function isWarning(record) {
+  let v = parseInt(document.getElementById("threshold").value);
+  return v != -1 && v < record.time;
 }
