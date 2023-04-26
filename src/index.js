@@ -118,5 +118,11 @@ function isWarning(record) {
 
 function warning(record) {
   events.push(record.tick);
-  if (document.getElementById("alert").checked) alertSound.play();
+  if (document.getElementById("alert").checked){
+    try {
+      alertSound.play();
+    } catch (error) {
+      console.log(error);
+    }
+  }
 }
