@@ -3,6 +3,7 @@ let log = [];
 let events = [];
 let alertSound = new Audio("/res/alert.wav");
 let enabledAlert = false;
+let timeout = 5000;
 window.addEventListener('DOMContentLoaded', () => {
   var options = {
     element: 'line-chart',
@@ -76,11 +77,14 @@ async function getPingTime() {
   const start = new Date();
   let result;
   try {
-    const res = await fetch(`${location.href}/res/data.txt`, {cache: "no-store"});
+    const res = await axios.get(`${location.href}/res/data.txt`, {
+      params: { unique: start.getTime() },
+      timeout: timeout
+    });
     const end = new Date();
     const duration = (end - start);
     let length = parseInt(res.headers.get("Content-Length"));
-    for (const [name, value] of res.headers.entries()) {
+    for (const [name, value] of res.headers) {
       length += name.length + value.length;
     }
     result = {
@@ -99,6 +103,7 @@ function updateGoalValue() {
   const [_,__,avg] = getMinMax();
   const g = [avg];
   const n = document.getElementById("threshold").value;
+  timeout = avg * 100;
   if(n != -1) g.push(n);
   chart.options.goals = g;
 }
