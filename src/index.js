@@ -1,7 +1,7 @@
 let chart;
 let log = [];
 let events = [];
-let alertSound = new Audio("/res/alert.wav");
+let alertSound = new Audio("./res/alert.wav");
 let enabledAlert = false;
 let timeout = 5000;
 window.addEventListener('DOMContentLoaded', () => {
