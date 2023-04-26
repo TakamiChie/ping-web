@@ -1,6 +1,8 @@
 let chart;
 let log = [];
 let events = [];
+let alertSound = new Audio("/res/alert.wav");
+let enabledAlert = false;
 window.addEventListener('DOMContentLoaded', () => {
   var options = {
     element: 'line-chart',
@@ -48,7 +50,7 @@ async function ping() {
         time: r.duration
       };
       if(isWarning(record)){
-        events.push(record.tick);
+        warning(record);
       }
       label = `ping ${r.length}byte responce ${r.duration}ms(${r.speed}Kbps)`
     }else{
@@ -57,7 +59,7 @@ async function ping() {
         time: null,
         message: r.error
       };
-      events.push(record.tick);
+      warning(record);
       label = `error!:${r.error}`;
     }
     log.push(record);
@@ -114,4 +116,9 @@ function getMinMax(){
 function isWarning(record) {
   let v = parseInt(document.getElementById("threshold").value);
   return v != -1 && v < record.time;
+}
+
+function warning(record) {
+  events.push(record.tick);
+  if (document.getElementById("alert").checked) alertSound.play();
 }
