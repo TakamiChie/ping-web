@@ -13,7 +13,7 @@ window.addEventListener('DOMContentLoaded', () => {
         };
         break;
       case "SELECT":
-        v = e.value;
+        e.value = v;
         break;
     }
     e.addEventListener("input", (el) => {

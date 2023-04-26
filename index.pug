@@ -12,9 +12,9 @@ html(lang="en")
     .card#controller
       .card-body
         div.form-check.form-switch
-          input#active.form-check-input(type="checkbox" checked)
+          input#active.form-check-input.savecontrols(type="checkbox")
           label.form-check-label(for="active") Ping
-        select#threshold.form-select(aria-label="threshold")
+        select#threshold.form-select.savecontrols(aria-label="threshold")
           option(value="-1") none
           option(value="10") >10ms
           option(value="100") >100ms
